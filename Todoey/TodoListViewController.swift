@@ -10,7 +10,7 @@ import UIKit
 
 class TodoListViewController: UITableViewController {
     
-    let itemArray = ["Find Mike", "Buy Eggos", "Destroy Demogorgon"]
+    var itemArray = ["Find Mike", "Buy Eggos", "Destroy Demogorgon"]
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -39,7 +39,7 @@ class TodoListViewController: UITableViewController {
         return 1
     }
     
-    // MARK - TableView Delegate Methods
+    //MARK - TableView Delegate Methods
     
     // Tells the delegate that the specified row is now selected
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -58,10 +58,40 @@ class TodoListViewController: UITableViewController {
         
         // Deselect the row so it doesn't stay highlighted
         tableView.deselectRow(at: indexPath, animated: true)
+   
+    }
+    //MARK - Add New Items
+    @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
         
+        // Show UIAlert control with a Text Field so I can write a quick Todo List Item then append it to the end of my itemArray
         
+        var textField = UITextField()
+        
+        let alert = UIAlertController(title: "Add New Todoey Item", message: "", preferredStyle: .alert)
+        
+        let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
+            
+            // What will happen once the user clicks the Add Item button on our UIAlert
+            
+            if let newItem = textField.text {
+                self.itemArray.append(newItem)
+            }
+            
+            self.tableView.reloadData() // Update tableview DATA
+            
+        }
+        
+        alert.addTextField { (alertTextField) in
+            alertTextField.placeholder = "Create new item"
+            textField = alertTextField
+        }
+        
+        alert.addAction(action)
+        
+        present(alert, animated: true, completion: nil)
         
     }
+    
 
 
 }
