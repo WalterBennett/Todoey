@@ -18,7 +18,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // This gets called when your app gets loaded up.  This is the first thing that happens.
         // It happens BEFORE the viewDidLoad
         
-        print(NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).last! as String)
+        //Find the directory that contains the NSUserDefaults pList
+//        print(NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).last! as String)
         
         
         return true
