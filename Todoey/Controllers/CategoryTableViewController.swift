@@ -7,15 +7,15 @@
 //
 
 import UIKit
-import CoreData
-
+import RealmSwift
 
 class CategoryTableViewController: UITableViewController {
     
-    var categoryArray = [Category]()
+    // Initialize a NEW access point to our REALM db
+    let realm = try! Realm()
     
-    // Create an Object of the AppDelegate to access it's viewContext
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    // Collection of Results that are Category OBJECTS
+    var categories: Results<Category>?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -26,41 +26,65 @@ class CategoryTableViewController: UITableViewController {
 
     // MARK: - TableView Datasource Methods
     
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {              // number of rows in tableView
-        return categoryArray.count
+    // numberOfRowsInSection - Tells the delegate how many rows are contained in the section
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return categories?.count ?? 1   // IF there's NO categories yet, then return 1 cell
     }
-
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {   // create a cell for each table view row
-        
-        let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath)    // create a re-usable cell and add it to the index path
-
-        cell.textLabel?.text = categoryArray[indexPath.row].name    // set the text from the data model
+    
+    // cellForRowAt - Populates and Defines the tableView cell
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        // create a re-usable cell and add it to the index path
+        let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath)
+        // set the text from the data model
+        cell.textLabel?.text = categories?[indexPath.row].name ?? "No Categories Added Yet."
         
         return cell
-        
     }
     
     // MARK: - TableView Delegate Methods
-    // Tells the delegate that the specified row is now selected
+    
+    // didSelectRowAt - Tells the delegate that the specified row is now selected
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        
-        performSegue(withIdentifier: "goToItems", sender: self)
-        
+        performSegue(withIdentifier: "goToItems", sender: self) // Takes us to the TodoListViewController
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        let destinationVC = segue.destination as! TodoListViewController    // Create a reference of the destination VC
+        // Create a NEW instance of the destination VC
+        let destinationVC = segue.destination as! TodoListViewController
         
         // Grab the category that corresponds to the selected cell
         if let indexPath = tableView.indexPathForSelectedRow {  // Get the selected cell??
-            destinationVC.selectedCategory = categoryArray[indexPath.row]
+            destinationVC.selectedCategory = categories?[indexPath.row] // This is the category cell that was clicked
         }
     }
-
-    // MARK: - Add new Categories
-    @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
-        // Show UIAlert control with a Text Field so I can write a quick Todo List Item then append it to the end of my itemArray
+    
+    // MARK: - Data Manipulation Methods
+    func save(category: Category) {
         
+        do {
+            try realm.write {
+                realm.add(category)
+            }
+        } catch {
+            print("Error saving category \(error)")
+        }
+ 
+        self.tableView.reloadData() // Update tableView DATA
+    }
+    
+    func loadCategories() {
+        
+        categories = realm.objects(Category.self)   // Fetch all the data in the Category datatype
+
+        tableView.reloadData()  // Update tableView Data - CALL ALL the DATASOURCE METHODS
+        
+    }
+
+    // MARK: - Add new Categories - CRUD (C - Create)
+    
+    @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
+        
+        // Show UIAlert control with a Text Field so I can write a quick Todo List Item
         var textField = UITextField()
         
         let alert = UIAlertController(title: "Add New Category", message: "", preferredStyle: .alert)
@@ -68,12 +92,10 @@ class CategoryTableViewController: UITableViewController {
         let action = UIAlertAction(title: "Add", style: .default) { (action) in
             
             // What will happen once the user clicks the Add Item button inside the Alert
-            let newCategory = Category(context: self.context)
-            newCategory.name = textField.text!
+            let newCategory = Category()    // CREATE a new Category OBJECT
+            newCategory.name = textField.text!  // Name the OBJECT based on what the user typed in the textField
             
-            self.categoryArray.append(newCategory)
-            
-            self.saveCategories()
+            self.save(category: newCategory)    // CALL the SAVE method
             
         }
         
@@ -87,33 +109,10 @@ class CategoryTableViewController: UITableViewController {
         present(alert, animated: true, completion: nil)
     }
     
-    // MARK: - Data Manipulation Methods
-    func saveCategories() {
-        
-        do {
-            try context.save()
-        } catch {
-            print("Error saving category \(error)")
-        }
-        
-        // Update tableView DATA
-        self.tableView.reloadData()
-    }
     
     
-    func loadCategories(with request: NSFetchRequest<Category> = Category.fetchRequest()) {
-        
-        // READ data from our Context
-        do {
-            categoryArray = try context.fetch(request)  // Perform REQUEST
-        } catch {
-            print("Error fetching data from context \(error)")
-        }
-        
-        // Update tableView Data
-        tableView.reloadData()
-        
-    }
+    
+    
     
 
     
