@@ -143,7 +143,7 @@ extension TodoListViewController : UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         // Query the todoItems ARRAY using an NSPredicate as a Filter ("title CONTAINS[cd] %@")
         todoItems = todoItems?.filter("title CONTAINS[cd] %@", searchBar.text!).sorted(byKeyPath: "dateCreated", ascending: true)
-        
+        tableView.reloadData()
     }
 
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
