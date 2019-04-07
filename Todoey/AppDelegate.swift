@@ -18,13 +18,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
         // Find out where our REALM file is
-        // print(Realm.Configuration.defaultConfiguration.fileURL)
+        // print(Realm.Configuration.defaultConfiguration.fileURL ?? "No configuration file found")
         
+        // Initialize Realm
         do {
             _ = try Realm()
             
         } catch {
-            print("Error initialising new realm, \(error)")
+            print("Error initialising new Realm, \(error)")
         }
         
         return true

@@ -11,6 +11,7 @@ import RealmSwift
 
 class Category: Object {
     @objc dynamic var name : String = ""
+    @objc dynamic var color : String = ""
     
     // Create Forward Relationship (One to Many)
     let items = List<Item>()
